@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale: 1.0">
+    <title>Gerador de JSON</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-width: 600px;
+        }
+        input, textarea, select {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        select {
+            background-color: #f0f8ff; /* Cor diferenciada para o seletor */
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #f7e9de !important;
+            color: #19262b !important;
+  
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkgray !important;
+        }
+        .entry {
+            cursor: move;
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .entry:hover {
+            background-color: #f1f1f1;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Posição acima */
+            left: 50%;
+            margin-left: -125px; /* Ajustar para centralizar */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Importar / Editar / Gerar / Salvar</h1>
+
+<div class="tooltip">
+    <label for="id">ID:</label>
+    <span class="tooltiptext">Exemplo: "mae-start".<br>Digite um ID único para cada entrada.</span>
+</div>
+<input type="text" id="id" placeholder="Digite um ID único">
+
+<div class="tooltip">
+    <label for="categoria">Categoria:</label>
+    <span class="tooltiptext">Exemplo: "M.A.E.".<br>Digite a categoria da entrada.</span>
+</div>
+<input type="text" id="categoria" placeholder="Digite a categoria">
+
+<div class="tooltip">
+    <label for="assunto">Assunto:</label>
+    <span class="tooltiptext">Exemplo: "Início do Curso".<br>Digite o título ou assunto da entrada.</span>
+</div>
+<input type="text" id="assunto" placeholder="Digite o assunto">
+
+<div class="tooltip">
+    <label for="descricao">Descrição:</label>
+    <span class="tooltiptext">Exemplo: "Descrição breve do curso".<br>Digite uma descrição detalhada.</span>
+</div>
+<textarea id="descricao" placeholder="Digite a descrição"></textarea>
+
+<div class="tooltip">
+    <label for="url">URL:</label>
+    <span class="tooltiptext">Exemplo: "https://exemplo.com".<br>Digite a URL relacionada à entrada.</span>
+</div>
+<input type="text" id="url" placeholder="Digite a URL">
+
+<div>
+    <label for="actionType">Ação:</label>
+    <select id="actionType">
+        <option value="add">Adicionar</option>
+        <option value="replace">Substituir</option>
+    </select>
+</div>
+
+<button id="addButton">Adicionar/Modificar</button>
+<button id="saveButton">Salvar JSON</button>
+<input type="file" id="fileInput" accept=".json">
+<button id="loadButton">Carregar JSON</button>
+<button id="toggleReorderButton">Reordenar</button> <!-- Botão para ativar/desativar reordenação -->
+
+<h2>Resultado:</h2>
+<div id="outputJson" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+
+<script>
+    const entries = {};
+    let loadedFileName = '';
+    let editingId = null;
+    let isReordering = false; // Flag para controlar o modo de reordenação
+
+    document.getElementById('addButton').addEventListener('click', function() {
+        const id = document.getElementById('id').value.trim();
+        const categoria = document.getElementById('categoria').value.trim();
+        const assunto = document.getElementById('assunto').value.trim();
+        const descricao = document.getElementById('descricao').value.trim();
+        const url = document.getElementById('url').value.trim();
+        const actionType = document.getElementById('actionType').value;
+
+        if (!id || !categoria || !assunto || !descricao || !url) {
+            alert('Por favor, preencha todos os campos.');
+            return;
+        }
+
+        if (actionType === 'replace') {
+            entries[id] = {
+                title: assunto,
+                description: descricao,
+                url: url,
+                category: categoria
+            };
+        } else {
+            // Adiciona nova entrada, se não existir
+            if (!entries[id]) {
+                entries[id] = {
+                    title: assunto,
+                    description: descricao,
+                    url: url,
+                    category: categoria
+                };
+            } else {
+                alert('ID já existe. Para substituir, selecione "Substituir" na ação.');
+            }
+        }
+
+        displayEntries();
+        clearFields();
+    });
+
+    document.getElementById('saveButton').addEventListener('click', function() {
+        const fileName = loadedFileName || 'dados.json';
+        const newFileName = prompt('Digite o nome do arquivo (sem extensão):', fileName.replace('.json', '')) || 'dados';
+        const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${newFileName}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+
+    document.getElementById('loadButton').addEventListener('click', function() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            alert('Por favor, selecione um arquivo JSON para carregar.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            try {
+                const loadedEntries = JSON.parse(event.target.result);
+                Object.assign(entries, loadedEntries);
+                loadedFileName = file.name;
+                displayEntries();
+            } catch (error) {
+                alert('Erro ao carregar o arquivo: ' + error);
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    document.getElementById('toggleReorderButton').addEventListener('click', function() {
+        isReordering = !isReordering; // Alterna o modo de reordenação
+        const outputDiv = document.getElementById('outputJson');
+        outputDiv.style.cursor = isReordering ? 'move' : 'default'; // Altera o cursor conforme o modo
+        outputDiv.querySelectorAll('.entry').forEach(entry => {
+            entry.draggable = isReordering; // Define se as entradas são arrastáveis
+        });
+        this.textContent = isReordering ? 'Manter' : 'Reordenar'; // Altera o texto do botão
+    });
+
+    function displayEntries() {
+        const outputDiv = document.getElementById('outputJson');
+        outputDiv.innerHTML = ''; // Limpar visualização anterior
+        const sortedEntries = Object.keys(entries).sort(); // Ordenar chaves
+
+        sortedEntries.forEach(id => {
+            const entry = entries[id];
+            const div = document.createElement('div');
+            div.className = 'entry';
+            div.textContent = `ID: ${id}, Título: ${entry.title}, Categoria: ${entry.category}`;
+            div.draggable = isReordering; // Define se a entrada é arrastável
+            div.ondragstart = (e) => dragStart(e, id);
+            div.ondrop = (e) => drop(e);
+            div.ondragover = allowDrop;
+
+            const editButton = document.createElement('button');
+            editButton.textContent = 'Editar';
+            editButton.onclick = () => editEntry(id);
+            div.appendChild(editButton);
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Deletar';
+            deleteButton.onclick = () => deleteEntry(id);
+            div.appendChild(deleteButton);
+
+            outputDiv.appendChild(div);
+        });
+    }
+
+    function clearFields() {
+        document.getElementById('id').value = '';
+        document.getElementById('categoria').value = '';
+        document.getElementById('assunto').value = '';
+        document.getElementById('descricao').value = '';
+        document.getElementById('url').value = '';
+        document.getElementById('actionType').value = 'add';
+    }
+
+    function editEntry(id) {
+        const entry = entries[id];
+        document.getElementById('id').value = id;
+        document.getElementById('categoria').value = entry.category;
+        document.getElementById('assunto').value = entry.title;
+        document.getElementById('descricao').value = entry.description;
+        document.getElementById('url').value = entry.url;
+        editingId = id; // Salvar o ID que está sendo editado
+        document.getElementById('actionType').value = 'replace'; // Muda para substituir
+    }
+
+    function deleteEntry(id) {
+        if (confirm(`Tem certeza que deseja deletar a entrada com ID: ${id}?`)) {
+            delete entries[id];
+            displayEntries();
+        }
+    }
+
+    function dragStart(event, id) {
+        event.dataTransfer.setData("text/plain", id);
+    }
+
+    function allowDrop(event) {
+        event.preventDefault();
+    }
+
+    function drop(event) {
+        event.preventDefault();
+        const idToMove = event.dataTransfer.getData("text/plain");
+        const currentEntries = Object.keys(entries);
+        
+        const newPosition = Array.from(event.target.parentNode.children).indexOf(event.target);
+
+        const idToSwap = currentEntries[newPosition];
+        
+        if (idToSwap && idToMove !== idToSwap) {
+            const movedEntry = entries[idToMove];
+            delete entries[idToMove];
+            entries[idToMove] = movedEntry; // Move o item para o novo índice
+        }
+
+        displayEntries(); // Re-exibe as entradas após a alteração
+    }
+</script>
+</body>
+</html>
