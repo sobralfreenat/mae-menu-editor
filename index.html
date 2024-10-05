@@ -51,23 +51,25 @@
         }
         .tooltip {
             position: relative;
+			
             display: inline-block;
         }
         .tooltip .tooltiptext {
             visibility: hidden;
-            width: 250px;
+            width: 450px;
             background-color: #555;
             color: #fff;
-            text-align: center;
+            text-align: left;
+			
             border-radius: 6px;
             padding: 5px 0;
             position: absolute;
             z-index: 1;
             bottom: 125%; /* Posição acima */
             left: 50%;
-            margin-left: -125px; /* Ajustar para centralizar */
-            opacity: 0;
-            transition: opacity 0.3s;
+            margin-left: -20px; /* Ajustar para centralizar */
+            opacity: 0.2;
+            transition: opacity 0.4s;
         }
         .tooltip:hover .tooltiptext {
             visibility: visible;
@@ -77,8 +79,10 @@
 </head>
 <body>
 
-<h1>Importar / Editar / Gerar / Salvar</h1>
+<h2>Importar / Editar / Gerar / Salvar</2> <br>
+<input type="file" id="fileInput" accept=".json">
 
+<button id="loadButton">Carregar JSON</button><br><br>
 <div class="tooltip">
     <label for="id">ID:</label>
     <span class="tooltiptext">Exemplo: "mae-start".<br>Digite um ID único para cada entrada.</span>
@@ -119,9 +123,9 @@
 
 <button id="addButton">Adicionar/Modificar</button>
 <button id="saveButton">Salvar JSON</button>
-<input type="file" id="fileInput" accept=".json">
-<button id="loadButton">Carregar JSON</button>
-<button id="toggleReorderButton">Reordenar</button> <!-- Botão para ativar/desativar reordenação -->
+
+<!--<button id="loadButton">Carregar JSON</button>
+<!--<button id="toggleReorderButton">Reordenar</button> <!-- Botão para ativar/desativar reordenação -->
 
 <h2>Resultado:</h2>
 <div id="outputJson" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
