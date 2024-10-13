@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de JSON</title>
     <style>
+        /* Seu CSS existente */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -12,6 +13,11 @@
             border: 1px solid #ccc;
             border-radius: 5px;
             max-width: 600px;
+        }
+		
+		h3, h6, h5 {
+            margin: 8px; /* Remove o espaço padrão */
+
         }
         input, textarea, select {
             width: 100%;
@@ -70,22 +76,32 @@
         }
         .tooltip:hover .tooltiptext {
             visibility: visible;
+			background-color: Black;
             opacity: 1;
+		}
+        .copy-button {
+            background-color: black !important; /* Cor de fundo verde */
+            color: white !important; /* Cor do texto */
+			font-size: 17px; /* Ajuste o tamanho da fonte aqui */
+        }
+        .copy-button:hover {
+            background-color: blue !important; /* Cor de fundo ao passar o mouse */
         }
     </style>
 </head>
 <body>
 
 <h3>M.A.E. Menu Editor</h3> 
-<h6>Versão 1.8 FNW ASsessoria Digital  - Alex Sobral 2024</h6> 
+<h6>Versão 1.8  - FNW ASsessoria Digital  - Alex Sobral 2024</h6> 
 <h5>Importar / Editar / Gerar / Salvar : <space>    </space>
 <!-- Botão para abrir instruções -->
 <button class="button" onclick="abrirOuFocarJanela('https://sobralfreenat.github.io/mae-menu-editor-instru-es/', 'Instruções')">Abrir Instruções</button><br><br>
 
 <input type="file" id="fileInput" accept=".json">
 <button id="loadButton">Carregar JSON</button><br><br>
-<button id="copyFileNameButton" style="display:none;">Copiar Nome do Arquivo - e pressione a tecla [Windows] e control+V e [Enter]</button><br><br>
+<button id="copyFileNameButton" class="copy-button" style="display:none;">Clique para Copiar Nome do Arquivo - pressione a tecla [Windows]<br> e control+V e [Enter]</button><br><br>
 
+<!-- O resto do seu código continua aqui -->
 <div class="tooltip">
     <label for="id">ID:</label>
     <span class="tooltiptext">Exemplo: "mae-start".<br>Digite um ID único para cada entrada.</span>
