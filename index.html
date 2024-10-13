@@ -27,7 +27,6 @@
             padding: 10px 15px;
             background-color: #f7e9de !important;
             color: #19262b !important;
-  
             border: none;
             border-radius: 5px;
             cursor: pointer;
@@ -51,7 +50,6 @@
         }
         .tooltip {
             position: relative;
-			
             display: inline-block;
         }
         .tooltip .tooltiptext {
@@ -60,7 +58,6 @@
             background-color: #555;
             color: #fff;
             text-align: left;
-			
             border-radius: 6px;
             padding: 5px 0;
             position: absolute;
@@ -79,10 +76,13 @@
 </head>
 <body>
 
-<h2>Importar / Editar / Gerar / Salvar</2> <br>
+<h2>Importar / Editar / Gerar / Salvar</h2> <br>
 <input type="file" id="fileInput" accept=".json">
 
 <button id="loadButton">Carregar JSON</button><br><br>
+<button id="copyFileNameButton" style="display:none;">Copiar Nome do Arquivo - e pressione a tecla [Windows]  e control+V e [Enter]</button><br><br>
+
+
 <div class="tooltip">
     <label for="id">ID:</label>
     <span class="tooltiptext">Exemplo: "mae-start".<br>Digite um ID único para cada entrada.</span>
@@ -123,9 +123,6 @@
 
 <button id="addButton">Adicionar/Modificar</button>
 <button id="saveButton">Salvar JSON</button>
-
-<!--<button id="loadButton">Carregar JSON</button>
-<!--<button id="toggleReorderButton">Reordenar</button> <!-- Botão para ativar/desativar reordenação -->
 
 <h2>Resultado:</h2>
 <div id="outputJson" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
@@ -203,6 +200,7 @@
                 Object.assign(entries, loadedEntries);
                 loadedFileName = file.name;
                 displayEntries();
+                document.getElementById('copyFileNameButton').style.display = 'inline'; // Exibe o botão de copiar
             } catch (error) {
                 alert('Erro ao carregar o arquivo: ' + error);
             }
@@ -210,14 +208,12 @@
         reader.readAsText(file);
     });
 
-    document.getElementById('toggleReorderButton').addEventListener('click', function() {
-        isReordering = !isReordering; // Alterna o modo de reordenação
-        const outputDiv = document.getElementById('outputJson');
-        outputDiv.style.cursor = isReordering ? 'move' : 'default'; // Altera o cursor conforme o modo
-        outputDiv.querySelectorAll('.entry').forEach(entry => {
-            entry.draggable = isReordering; // Define se as entradas são arrastáveis
+    document.getElementById('copyFileNameButton').addEventListener('click', function() {
+        navigator.clipboard.writeText(loadedFileName).then(() => {
+            alert('Nome do arquivo copiado: ' + loadedFileName);
+        }, (err) => {
+            console.error('Erro ao copiar: ', err);
         });
-        this.textContent = isReordering ? 'Manter' : 'Reordenar'; // Altera o texto do botão
     });
 
     function displayEntries() {
