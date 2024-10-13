@@ -2,13 +2,13 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale: 1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de JSON</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            padding: 20px;
+            padding: 25px;
             border: 1px solid #ccc;
             border-radius: 5px;
             max-width: 600px;
@@ -16,16 +16,16 @@
         input, textarea, select {
             width: 100%;
             margin-bottom: 10px;
-            padding: 10px;
+            padding: 15px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
         select {
-            background-color: #f0f8ff; /* Cor diferenciada para o seletor */
+            background-color: gold; /* Cor diferenciada para o seletor */
         }
         button {
             padding: 10px 15px;
-            background-color: #f7e9de !important;
+            background-color: #f7f6a3 !important;
             color: #19262b !important;
             border: none;
             border-radius: 5px;
@@ -76,43 +76,41 @@
 </head>
 <body>
 
-<h2>Importar / Editar / Gerar / Salvar</h2> <br>
+<h3>M.A.E. Menu Editor</h3> 
+<h6>Versão 1.8 FNW ASsessoria Digital  - Alex Sobral 2024</h6> 
+<h5>Importar / Editar / Gerar / Salvar : <space>    </space>
+<!-- Botão para abrir instruções -->
+<button class="button" onclick="abrirOuFocarJanela('https://sobralfreenat.github.io/mae-menu-editor-instru-es/', 'Instruções')">Abrir Instruções</button><br><br>
+
 <input type="file" id="fileInput" accept=".json">
-
 <button id="loadButton">Carregar JSON</button><br><br>
-<button id="copyFileNameButton" style="display:none;">Copiar Nome do Arquivo - e pressione a tecla [Windows]  e control+V e [Enter]</button><br><br>
-
+<button id="copyFileNameButton" style="display:none;">Copiar Nome do Arquivo - e pressione a tecla [Windows] e control+V e [Enter]</button><br><br>
 
 <div class="tooltip">
     <label for="id">ID:</label>
     <span class="tooltiptext">Exemplo: "mae-start".<br>Digite um ID único para cada entrada.</span>
 </div>
 <input type="text" id="id" placeholder="Digite um ID único">
-
 <div class="tooltip">
     <label for="categoria">Categoria:</label>
     <span class="tooltiptext">Exemplo: "M.A.E.".<br>Digite a categoria da entrada.</span>
 </div>
 <input type="text" id="categoria" placeholder="Digite a categoria">
-
 <div class="tooltip">
     <label for="assunto">Assunto:</label>
     <span class="tooltiptext">Exemplo: "Início do Curso".<br>Digite o título ou assunto da entrada.</span>
 </div>
 <input type="text" id="assunto" placeholder="Digite o assunto">
-
 <div class="tooltip">
     <label for="descricao">Descrição:</label>
     <span class="tooltiptext">Exemplo: "Descrição breve do curso".<br>Digite uma descrição detalhada.</span>
 </div>
 <textarea id="descricao" placeholder="Digite a descrição"></textarea>
-
 <div class="tooltip">
     <label for="url">URL:</label>
     <span class="tooltiptext">Exemplo: "https://exemplo.com".<br>Digite a URL relacionada à entrada.</span>
 </div>
 <input type="text" id="url" placeholder="Digite a URL">
-
 <div>
     <label for="actionType">Ação:</label>
     <select id="actionType">
@@ -120,7 +118,6 @@
         <option value="replace">Substituir</option>
     </select>
 </div>
-
 <button id="addButton">Adicionar/Modificar</button>
 <button id="saveButton">Salvar JSON</button>
 
@@ -296,6 +293,15 @@
         }
 
         displayEntries(); // Re-exibe as entradas após a alteração
+    }
+
+    function abrirOuFocarJanela(url, title) {
+        const left = 300; // Posição a 300px do canto esquerdo
+        const top = 100; // Posição vertical
+        const width = 400; // Largura da janela
+        const height = 600; // Altura da janela
+        const options = `width=${width},height=${height},top=${top},left=${left}`;
+        window.open(url, title, options);
     }
 </script>
 </body>
