@@ -13,6 +13,10 @@
             border-radius: 5px;
             max-width: 600px;
         }
+		
+		h3, h6, h5 {
+            margin: 8px;
+        }
         input, textarea, select {
             width: 100%;
             margin-bottom: 10px;
@@ -21,7 +25,7 @@
             border-radius: 5px;
         }
         select {
-            background-color: gold; /* Cor diferenciada para o seletor */
+            background-color: gold;
         }
         button {
             padding: 10px 15px;
@@ -62,29 +66,68 @@
             padding: 5px 0;
             position: absolute;
             z-index: 1;
-            bottom: 125%; /* Posição acima */
+            bottom: 125%;
             left: 50%;
-            margin-left: -20px; /* Ajustar para centralizar */
+            margin-left: -20px;
             opacity: 0.2;
             transition: opacity 0.4s;
         }
         .tooltip:hover .tooltiptext {
             visibility: visible;
+			background-color: Black;
             opacity: 1;
+		}
+        .copy-button {
+            background-color: black !important;
+            color: white !important;
+			font-size: 17px;
         }
+        .copy-button:hover {
+            background-color: blue !important;
+        }
+        .entry.sortable-ghost {
+            opacity: 0.4;
+        }
+        .entry.sortable-drag {
+            opacity: 0.8;
+        }
+        .reorder-button {
+            background-color: black !important;
+            color: white !important;
+        }
+		
+		
+        .button-container {
+            display: flex;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+		#saveButton {
+            background-color: darkgreen !important;
+            color: white !important;
+            font-size: 14px;
+            padding: 15px 23px;
+            border-radius: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+        }
+        #saveButton:hover {
+            background-color: #45a049 !important;
+        }
+
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body>
 
 <h3>M.A.E. Menu Editor</h3> 
-<h6>Versão 1.8 FNW ASsessoria Digital  - Alex Sobral 2024</h6> 
+<h6>Versão 1.8  - FNW ASsessoria Digital  - Alex Sobral 2024</h6> 
 <h5>Importar / Editar / Gerar / Salvar : <space>    </space>
-<!-- Botão para abrir instruções -->
 <button class="button" onclick="abrirOuFocarJanela('https://sobralfreenat.github.io/mae-menu-editor-instru-es/', 'Instruções')">Abrir Instruções</button><br><br>
 
 <input type="file" id="fileInput" accept=".json">
 <button id="loadButton">Carregar JSON</button><br><br>
-<button id="copyFileNameButton" style="display:none;">Copiar Nome do Arquivo - e pressione a tecla [Windows] e control+V e [Enter]</button><br><br>
+<button id="copyFileNameButton" class="copy-button" style="display:none;">Clique para Copiar Nome do Arquivo - pressione a tecla [Windows]<br> e control+V e [Enter]</button><br><br>
 
 <div class="tooltip">
     <label for="id">ID:</label>
@@ -119,16 +162,20 @@
     </select>
 </div>
 <button id="addButton">Adicionar/Modificar</button>
-<button id="saveButton">Salvar JSON</button>
+<button id="reorderButton" class="reorder-button">Ativar Reordenação</button>
+
 
 <h2>Resultado:</h2>
-<div id="outputJson" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+<div id="outputJson"></div>
 
+
+<button id="saveButton">Salvar JSON</button>
 <script>
     const entries = {};
     let loadedFileName = '';
     let editingId = null;
-    let isReordering = false; // Flag para controlar o modo de reordenação
+    let isReordering = false;
+    let sortable;
 
     document.getElementById('addButton').addEventListener('click', function() {
         const id = document.getElementById('id').value.trim();
@@ -151,7 +198,6 @@
                 category: categoria
             };
         } else {
-            // Adiciona nova entrada, se não existir
             if (!entries[id]) {
                 entries[id] = {
                     title: assunto,
@@ -169,17 +215,28 @@
     });
 
     document.getElementById('saveButton').addEventListener('click', function() {
-        const fileName = loadedFileName || 'dados.json';
-        const newFileName = prompt('Digite o nome do arquivo (sem extensão):', fileName.replace('.json', '')) || 'dados';
-        const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${newFileName}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+    const fileName = loadedFileName || 'dados.json';
+    const newFileName = prompt('Digite o nome do arquivo (sem extensão):', fileName.replace('.json', '')) || 'dados';
+    
+    // Cria um novo objeto com a ordem atual
+    const orderedEntries = {};
+    const outputDiv = document.getElementById('outputJson');
+    const entryDivs = outputDiv.querySelectorAll('.entry');
+    
+    entryDivs.forEach(div => {
+        const id = div.getAttribute('data-id');
+        orderedEntries[id] = entries[id];
     });
+
+    const blob = new Blob([JSON.stringify(orderedEntries, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${newFileName}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+});
 
     document.getElementById('loadButton').addEventListener('click', function() {
         const fileInput = document.getElementById('fileInput');
@@ -197,7 +254,7 @@
                 Object.assign(entries, loadedEntries);
                 loadedFileName = file.name;
                 displayEntries();
-                document.getElementById('copyFileNameButton').style.display = 'inline'; // Exibe o botão de copiar
+                document.getElementById('copyFileNameButton').style.display = 'inline';
             } catch (error) {
                 alert('Erro ao carregar o arquivo: ' + error);
             }
@@ -213,31 +270,51 @@
         });
     });
 
+    document.getElementById('reorderButton').addEventListener('click', toggleReordering);
+
+    function toggleReordering() {
+        isReordering = !isReordering;
+        const outputDiv = document.getElementById('outputJson');
+        const reorderButton = document.getElementById('reorderButton');
+        
+        if (isReordering) {
+            sortable = new Sortable(outputDiv, {
+                animation: 150,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function(evt) {
+                    const itemEl = evt.item;
+                    const newIndex = evt.newIndex;
+                    const id = itemEl.getAttribute('data-id');
+                    reorderEntries(id, newIndex);
+                }
+            });
+            reorderButton.textContent = 'Desativar Reordenação';
+        } else {
+            if (sortable) {
+                sortable.destroy();
+            }
+            reorderButton.textContent = 'Ativar Reordenação';
+        }
+        
+        displayEntries();
+    }
+
     function displayEntries() {
         const outputDiv = document.getElementById('outputJson');
-        outputDiv.innerHTML = ''; // Limpar visualização anterior
-        const sortedEntries = Object.keys(entries).sort(); // Ordenar chaves
+        outputDiv.innerHTML = '';
+        const sortedEntries = Object.keys(entries);
 
         sortedEntries.forEach(id => {
             const entry = entries[id];
             const div = document.createElement('div');
             div.className = 'entry';
-            div.textContent = `ID: ${id}, Título: ${entry.title}, Categoria: ${entry.category}`;
-            div.draggable = isReordering; // Define se a entrada é arrastável
-            div.ondragstart = (e) => dragStart(e, id);
-            div.ondrop = (e) => drop(e);
-            div.ondragover = allowDrop;
-
-            const editButton = document.createElement('button');
-            editButton.textContent = 'Editar';
-            editButton.onclick = () => editEntry(id);
-            div.appendChild(editButton);
-
-            const deleteButton = document.createElement('button');
-            deleteButton.textContent = 'Deletar';
-            deleteButton.onclick = () => deleteEntry(id);
-            div.appendChild(deleteButton);
-
+            div.setAttribute('data-id', id);
+            div.innerHTML = `
+                <span>ID: ${id}, Título: ${entry.title}, Categoria: ${entry.category}</span>
+                <button onclick="editEntry('${id}')">Editar</button>
+                <button onclick="deleteEntry('${id}')">Deletar</button>
+            `;
             outputDiv.appendChild(div);
         });
     }
@@ -258,8 +335,8 @@
         document.getElementById('assunto').value = entry.title;
         document.getElementById('descricao').value = entry.description;
         document.getElementById('url').value = entry.url;
-        editingId = id; // Salvar o ID que está sendo editado
-        document.getElementById('actionType').value = 'replace'; // Muda para substituir
+        editingId = id;
+        document.getElementById('actionType').value = 'replace';
     }
 
     function deleteEntry(id) {
@@ -269,37 +346,25 @@
         }
     }
 
-    function dragStart(event, id) {
-        event.dataTransfer.setData("text/plain", id);
-    }
-
-    function allowDrop(event) {
-        event.preventDefault();
-    }
-
-    function drop(event) {
-        event.preventDefault();
-        const idToMove = event.dataTransfer.getData("text/plain");
+    function reorderEntries(id, newIndex) {
         const currentEntries = Object.keys(entries);
-        
-        const newPosition = Array.from(event.target.parentNode.children).indexOf(event.target);
-
-        const idToSwap = currentEntries[newPosition];
-        
-        if (idToSwap && idToMove !== idToSwap) {
-            const movedEntry = entries[idToMove];
-            delete entries[idToMove];
-            entries[idToMove] = movedEntry; // Move o item para o novo índice
+        const oldIndex = currentEntries.indexOf(id);
+        if (oldIndex > -1) {
+            currentEntries.splice(oldIndex, 1);
+            currentEntries.splice(newIndex, 0, id);
+            const newEntries = {};
+            currentEntries.forEach(key => {
+                newEntries[key] = entries[key];
+            });
+            Object.assign(entries, newEntries);
         }
-
-        displayEntries(); // Re-exibe as entradas após a alteração
     }
 
     function abrirOuFocarJanela(url, title) {
-        const left = 300; // Posição a 300px do canto esquerdo
-        const top = 100; // Posição vertical
-        const width = 400; // Largura da janela
-        const height = 600; // Altura da janela
+        const left = 300;
+        const top = 100;
+        const width = 400;
+        const height = 600;
         const options = `width=${width},height=${height},top=${top},left=${left}`;
         window.open(url, title, options);
     }
